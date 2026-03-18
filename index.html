@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>তোফাজ্জুল ফার্নিচার - অর্ডার ম্যানেজমেন্ট</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* 🟢 Modern Theme Variables */
+        :root {
+            --md-sys-color-primary: #2E7D32; 
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #C8E6C9; 
+            --md-sys-color-on-primary-container: #1B5E20;
+            --md-sys-color-error: #D32F2F; 
+            --md-sys-color-success: #388E3C;
+            --bg-color: #F4F7F6;
+            --text-color: #1D1B20;
+            --text-muted: #4A4A4A;
+            --card-bg: #FFFFFF;
+            --border-color: #E0E0E0;
+            --input-bg: #FFFFFF;
+            --input-text: #1D1B20;
+            --input-border: #BDBDBD;
+            --table-th-bg: #E8F5E9;
+            --table-th-color: #2E7D32;
+            --item-bg: #F9F9F9;
+        }
+
+        /* 🌙 Dark Mode Theme Variables */
+        body.dark-mode {
+            --md-sys-color-primary: #66BB6A; 
+            --md-sys-color-on-primary: #003314;
+            --md-sys-color-primary-container: #1B5E20; 
+            --md-sys-color-on-primary-container: #C8E6C9;
+            --md-sys-color-error: #EF5350; 
+            --md-sys-color-success: #81C784;
+            --bg-color: #121212;
+            --text-color: #E0E0E0;
+            --text-muted: #B0B0B0;
+            --card-bg: #1E1E1E;
+            --border-color: #333333;
+            --input-bg: #2C2C2C;
+            --input-text: #E0E0E0;
+            --input-border: #555555;
+            --table-th-bg: #1B5E20;
+            --table-th-color: #C8E6C9;
+            --item-bg: #252525;
+        }
+
+        body { font-family: 'Noto Sans Bengali', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
+        
+        #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, var(--md-sys-color-primary-container), var(--bg-color)); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .login-card { background: var(--card-bg); padding: 40px 30px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--md-sys-color-primary); }
+        .login-card .icon-bg { background: var(--md-sys-color-primary-container); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; }
+        .login-card h2 { color: var(--md-sys-color-primary); margin: 0 0 10px 0; font-size: 26px; }
+        .login-card p.welcome-msg { color: var(--text-muted); font-size: 16px; font-weight: 500; margin-bottom: 25px; line-height: 1.5; }
+        .login-card input { width: 100%; padding: 15px; margin: 10px 0 20px; background: var(--input-bg); color: var(--input-text); border: 2px solid var(--input-border); border-radius: 12px; box-sizing: border-box; font-size: 18px; text-align: center; transition: 0.3s; letter-spacing: 2px;}
+        .login-card input:focus { border-color: var(--md-sys-color-primary); outline: none; }
+        
+        #mainApp { display: none; }
+
+        .header { background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15); position: sticky; top: 0; z-index: 100; transition: 0.3s;}
+        .header h1 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 0.5px;}
+        .container { padding: 24px 16px; max-width: 850px; margin: auto; min-height: 80vh;}
+        
+        .card { background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid var(--border-color); transition: 0.3s;}
+        .card-title { margin-top: 0; font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 12px; border-bottom: 2px solid var(--border-color); padding-bottom: 12px; margin-bottom: 20px; color: var(--md-sys-color-primary); }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+        .stat-box { background: var(--md-sys-color-primary-container); padding: 25px 20px; border-radius: 16px; text-align: center; border: 1px solid var(--md-sys-color-primary); transition: 0.3s;}
+        .stat-box.red-box { background: rgba(211, 47, 47, 0.1); border: 1px solid var(--md-sys-color-error); } 
+        .stat-box h3 { margin: 0; font-size: 32px; font-weight: 700;}
+        .stat-box p { margin: 8px 0 0 0; font-size: 16px; font-weight: 600; }
+        .stat-box.red-box h3, .stat-box.red-box p { color: var(--md-sys-color-error); }
+        .stat-box:not(.red-box) h3, .stat-box:not(.red-box) p { color: var(--md-sys-color-on-primary-container); }
+
+        .input-group { margin-bottom: 18px; }
+        .input-group label { display: block; margin-bottom: 8px; color: var(--text-color); font-weight: 600; font-size: 15px; }
+        .input-group input, .input-group select { width: 100%; padding: 15px; background: var(--input-bg); color: var(--input-text); border: 1px solid var(--input-border); border-radius: 10px; box-sizing: border-box; font-family: inherit; font-size: 16px; transition: 0.3s; }
+        .input-group input:focus, .input-group select:focus { border-color: var(--md-sys-color-primary); outline: none; box-shadow: 0 0 8px rgba(46, 125, 50, 0.2); }
+
+        .items-container { background: var(--item-bg); padding: 18px; border-radius: 12px; border: 1px dashed var(--input-border); margin-bottom: 15px; }
+        .item-row { display: grid; grid-template-columns: 2fr 1fr 2fr auto; gap: 10px; margin-bottom: 12px; align-items: center; }
+        .item-row input { padding: 12px; background: var(--input-bg); color: var(--input-text); border: 1px solid var(--input-border); border-radius: 8px; width: 100%; box-sizing: border-box; }
+        .remove-btn { background: var(--md-sys-color-error); color: white; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        .btn { background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border: none; padding: 15px 24px; border-radius: 12px; font-size: 17px; font-weight: 600; font-family: inherit; cursor: pointer; display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.15); transition: 0.3s;}
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-outline { background: transparent; color: var(--md-sys-color-primary); border: 2px solid var(--md-sys-color-primary); box-shadow: none;}
+        
+        .action-buttons { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+        .btn-sm { padding: 10px 14px; font-size: 14px; font-weight: 600; border-radius: 8px; color: white; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: inherit; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+        .bg-green { background: #4CAF50; } .bg-blue { background: #1976D2; } .bg-orange { background: #F57C00; } .bg-teal { background: #00897B; } .bg-purple { background: #8E24AA; } .bg-dark { background: #546E7A; } 
+        
+        .loader { display: none; text-align: center; margin-top: 16px; color: var(--md-sys-color-primary); font-weight: bold; font-size: 16px;}
+        
+        .order-card { border: 1px solid var(--border-color); border-radius: 16px; padding: 22px; margin-bottom: 18px; background: var(--card-bg); transition: 0.3s;}
+        .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; } 
+        
+        .order-details p { margin: 8px 0; font-size: 18px; font-weight: 600; color: var(--text-muted); } 
+        .order-details p strong { color: var(--text-color); }
+        
+        .time-box { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; padding: 15px; background: var(--item-bg); border-radius: 12px; border-left: 5px solid var(--md-sys-color-primary);}
+        .time-box div { display: flex; align-items: center; gap: 8px; font-size: 17px; color: var(--text-muted); font-weight: 600; } 
+        .time-box div strong { color: var(--text-color); font-weight: 700;}
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(3px);}
+        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 20px; width: 90%; max-width: 550px; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid var(--border-color);}
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 12px;}
+        .modal-header h3 { margin: 0; font-size: 22px; color: var(--md-sys-color-primary); }
+        .close-btn { background: rgba(211, 47, 47, 0.1); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 22px; cursor: pointer; color: var(--md-sys-color-error); display: flex; align-items: center; justify-content: center; transition: 0.2s;}
+
+        .info-table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 15px; font-size: 16px; }
+        .info-table th { background-color: var(--table-th-bg); padding: 12px; text-align: left; color: var(--table-th-color); border: 1px solid var(--border-color);}
+        .info-table td { padding: 12px; border: 1px solid var(--border-color); color: var(--text-muted); font-weight: 500;}
+
+        #toast { visibility: hidden; min-width: 280px; background-color: var(--md-sys-color-primary); color: #FFF; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 2000; left: 50%; bottom: 30px; font-size: 17px; font-weight: bold; transform: translateX(-50%); box-shadow: 0 5px 15px rgba(0,0,0,0.3);}
+        #toast.error { background-color: var(--md-sys-color-error); }
+        #toast.show { visibility: visible; -webkit-animation: fadein 0.4s, fadeout 0.4s 3s; animation: fadein 0.4s, fadeout 0.4s 3s; }
+        
+        .file-upload-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; margin-bottom: 15px;}
+        .file-upload-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%;}
+        .file-upload-btn { background: var(--item-bg); border: 2px dashed var(--md-sys-color-primary); color: var(--md-sys-color-primary); padding: 20px; text-align: center; border-radius: 12px; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 16px;}
+        
+        .footer { text-align: center; padding: 25px; color: var(--text-muted); font-size: 15px; border-top: 1px solid var(--border-color); margin-top: 40px; font-weight: 500;}
+        .footer a { color: var(--md-sys-color-primary); text-decoration: none; font-weight: bold; }
+
+        /* Export Image CSS */
+        #allInfoContentWrapper { background-color: var(--card-bg); color: var(--text-color); padding: 10px; border-radius: 10px;}
+        .exporting { padding: 30px !important; background-color: #FFFFFF !important; border-radius: 0 !important; color: #000000 !important;}
+        .exporting * { color: #000000 !important; border-color: #CCCCCC !important; }
+        .exporting .info-table th { background-color: #E8F5E9 !important; color: #2E7D32 !important; border: 1px solid #CCCCCC !important;}
+        .exporting .info-table td { border: 1px solid #CCCCCC !important; color: #000000 !important; font-weight: bold !important;}
+        .exporting h4 { color: #2E7D32 !important; }
+        .exporting .time-box { border-left: 5px solid #2E7D32 !important; background-color: #F9F9F9 !important;}
+        .exporting .total-due { color: #D32F2F !important; }
+        .exporting .signature-box { color: #2E7D32 !important; border-bottom: 1px dashed #333333 !important;}
+    </style>
+</head>
+<body onload="initApp()">
+
+    <div id="loginScreen">
+        <div class="login-card">
+            <div class="icon-bg">
+                <i class="material-icons" style="font-size: 45px; color: var(--md-sys-color-primary);">admin_panel_settings</i>
+            </div>
+            <h2>তোফাজ্জুল ফার্নিচার</h2>
+            <p class="welcome-msg">স্বাগতম! তোফাজ্জুল ফার্নিচার ম্যানেজমেন্ট সিস্টেমে আপনাকে স্বাগতম। অ্যাক্সেস করতে পিন দিন।</p>
+            <input type="password" id="appPwd" placeholder="••••••••">
+            <button class="btn" onclick="verifyPassword()"><i class="material-icons">login</i> লগইন করুন</button>
+            <p id="pwdError" style="color: var(--md-sys-color-error); display: none; font-size: 15px; margin-top: 15px; font-weight: bold;">পাসওয়ার্ড ভুল হয়েছে!</p>
+        </div>
+    </div>
+
+    <div id="mainApp">
+        <div class="header">
+            <h1>তোফাজ্জুল ফার্নিচার</h1>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <i class="material-icons" id="themeToggleBtn" onclick="toggleTheme()" style="cursor:pointer; font-size:26px;" title="থিম পরিবর্তন">dark_mode</i>
+                <i class="material-icons" onclick="loadDashboardData()" style="cursor:pointer; font-size:26px;" title="রিফ্রেশ করুন">refresh</i>
+                <i class="material-icons" onclick="logout()" style="cursor:pointer; font-size:26px;" title="লগআউট">logout</i>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="card">
+                <h2 class="card-title"><i class="material-icons">analytics</i> ব্যবসার বর্তমান অবস্থা</h2>
+                <div class="stats-grid">
+                    <div class="stat-box"><h3 id="totalOrders">০</h3><p>মোট রানিং অর্ডার</p></div>
+                    <div class="stat-box red-box"><h3 id="totalDues">০ ৳</h3><p>বাজারে মোট বকেয়া</p></div>
+                </div>
+                <button class="btn" onclick="openModal('newOrderModal')"><i class="material-icons">add_circle</i> নতুন অর্ডার যোগ করুন</button>
+            </div>
+
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 12px;">
+                    <h2 style="margin: 0; color: var(--md-sys-color-primary); font-size: 20px; display: flex; align-items: center; gap: 8px;"><i class="material-icons">list_alt</i> রানিং অর্ডার</h2>
+                    <button id="viewAllRunningBtn" class="btn-sm bg-blue" style="display:none;" onclick="renderRunningOrders(false)">সবগুলো দেখুন</button>
+                    <button id="viewLessRunningBtn" class="btn-sm bg-blue" style="display:none;" onclick="renderRunningOrders(true)">সংক্ষিপ্ত করুন</button>
+                </div>
+                <div id="runningOrderListLoading" class="loader" style="display: block;">ডেটা লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</div>
+                <div id="runningOrderListContainer"></div>
+            </div>
+
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 12px;">
+                    <h2 style="margin: 0; color: var(--md-sys-color-success); font-size: 20px; display: flex; align-items: center; gap: 8px;"><i class="material-icons">task_alt</i> সম্পন্ন হওয়া অর্ডার</h2>
+                    <button id="viewAllCompletedBtn" class="btn-sm bg-blue" style="display:none;" onclick="renderCompletedOrders(false)">সবগুলো দেখুন</button>
+                    <button id="viewLessCompletedBtn" class="btn-sm bg-blue" style="display:none;" onclick="renderCompletedOrders(true)">সংক্ষিপ্ত করুন</button>
+                </div>
+                <div id="completedOrderListContainer"></div>
+            </div>
+
+            <div style="text-align: center; margin-top: 15px;">
+                <button class="btn btn-outline" style="border-color: var(--md-sys-color-error); color: var(--md-sys-color-error);" onclick="openModal('cancelledOrdersModal')">
+                    <i class="material-icons">cancel</i> বাতিলকৃত অর্ডারসমূহ
+                </button>
+            </div>
+
+            <div class="footer">
+                &copy; 2026 তোফাজ্জুল ফার্নিচার।<br>
+                সিস্টেমটি তৈরি করেছেন <a href="#">M. H. Mahim</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="newOrderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>নতুন অর্ডার ফর্ম</h3>
+                <button class="close-btn" onclick="closeModal('newOrderModal')"><i class="material-icons">close</i></button>
+            </div>
+            <form id="orderForm">
+                <div class="input-group">
+                    <label>অর্ডার নং (অটোমেটিক বসবে)</label>
+                    <input type="text" id="orderId" placeholder="YYYYXXXX">
+                </div>
+                <div class="input-group"><label>গ্রাহকের নাম</label><input type="text" id="customerName" required></div>
+                <div class="input-group"><label>ফোন নম্বর</label><input type="tel" id="phone" required></div>
+                <div class="input-group"><label>ঠিকানা</label><input type="text" id="address"></div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="input-group"><label>অর্ডার গ্রহণের তারিখ</label><input type="date" id="orderDate" required></div>
+                    <div class="input-group"><label>ডেলিভারির তারিখ</label><input type="date" id="deliveryDate"></div>
+                </div>
+
+                <div class="file-upload-wrapper">
+                    <div class="file-upload-btn">
+                        <i class="material-icons" style="font-size:35px;">add_photo_alternate</i>
+                        <span id="fileNameDisplay">ডিজাইনের ছবি যোগ করুন (মাল্টিপল সম্ভব)</span>
+                    </div>
+                    <input type="file" id="designImage" accept="image/*" multiple onchange="document.getElementById('fileNameDisplay').innerText = this.files.length + ' টি ছবি নির্বাচন করা হয়েছে';">
+                </div>
+
+                <label style="display: block; margin-bottom: 5px; color: var(--text-color); font-weight: bold; font-size:16px;">ফার্নিচারের তালিকা ও দাম</label>
+                <div class="items-container" id="itemsContainer">
+                    <div class="item-row">
+                        <input type="text" placeholder="কী বানাবে?" class="item-name" required>
+                        <input type="number" placeholder="দাম (৳)" class="item-price" required>
+                        <input type="text" placeholder="নোট" class="item-note">
+                        <button type="button" class="remove-btn" onclick="this.parentElement.remove()"><i class="material-icons" style="font-size: 18px;">close</i></button>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-outline" onclick="addItemRow()"><i class="material-icons">add</i> আরও ফার্নিচার যোগ করুন</button>
+
+                <div class="input-group" style="margin-top: 15px;"><label>অগ্রিম জমা (যদি থাকে)</label><input type="number" id="advancePayment" value="0"></div>
+                <div id="loading" class="loader">ডেটা সেভ হচ্ছে, ছবি থাকলে একটু সময় লাগবে...</div>
+                <button type="button" class="btn" onclick="processOrder()"><i class="material-icons">save</i> অর্ডার কনফার্ম করুন</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>তথ্য এডিট করুন</h3>
+                <button class="close-btn" onclick="closeModal('editModal')"><i class="material-icons">close</i></button>
+            </div>
+            
+            <input type="hidden" id="editOrderIdOriginal">
+            
+            <div class="input-group">
+                <label>অর্ডার নং (পরিবর্তন করা যাবে)</label>
+                <input type="text" id="editOrderIdInput" required>
+            </div>
+            <div class="input-group"><label>গ্রাহকের নাম</label><input type="text" id="editName"></div>
+            <div class="input-group"><label>ফোন নম্বর</label><input type="text" id="editPhone"></div>
+            <div class="input-group"><label>ঠিকানা</label><input type="text" id="editAddress"></div>
+            <div class="input-group">
+                <label>অর্ডারের স্ট্যাটাস</label>
+                <select id="editStatus">
+                    <option value="চলমান">চলমান (Running)</option>
+                    <option value="সম্পন্ন">সম্পন্ন (Completed)</option>
+                    <option value="বাতিল">বাতিল (Cancelled)</option>
+                </select>
+            </div>
+            <div id="editLoading" class="loader">আপডেট হচ্ছে...</div>
+            <button class="btn" onclick="submitEdit()"><i class="material-icons">update</i> সেভ করুন</button>
+            
+            <button class="btn" style="background-color: var(--md-sys-color-error); margin-top: 15px;" onclick="deleteOrder()">
+                <i class="material-icons">delete_forever</i> অর্ডার ডিলিট করুন
+            </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>নতুন জমা নিন</h3>
+                <button class="close-btn" onclick="closeModal('paymentModal')"><i class="material-icons">close</i></button>
+            </div>
+            <input type="hidden" id="payOrderId">
+            <p id="payCustomerName" style="color:var(--md-sys-color-primary); font-weight:bold; margin-top:0; font-size: 18px;"></p>
+            <div class="input-group"><label>জমার পরিমাণ (৳)</label><input type="number" id="payAmount" required></div>
+            <div class="input-group"><label>তারিখ</label><input type="date" id="payDate" required></div>
+            <div class="input-group"><label>নোট (যেমন: কাঠ কেনা)</label><input type="text" id="payNote"></div>
+            <div id="payLoading" class="loader">জমা যুক্ত হচ্ছে...</div>
+            <button class="btn" onclick="submitPayment()"><i class="material-icons">payments</i> জমা কনফার্ম করুন</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="allInfoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>গ্রাহকের সকল তথ্য</h3>
+                <button class="close-btn" onclick="closeModal('allInfoModal')"><i class="material-icons">close</i></button>
+            </div>
+            <div id="allInfoContentWrapper">
+                <div id="allInfoContent"></div>
+            </div>
+            <button class="btn bg-blue" id="downloadImgBtn" style="margin-top: 20px;">
+                <i class="material-icons">file_download</i> ছবি ডাউনলোড করুন
+            </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="cancelledOrdersModal">
+        <div class="modal-content" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3 style="color: var(--md-sys-color-error);"><i class="material-icons" style="vertical-align: middle;">cancel</i> বাতিলকৃত অর্ডারসমূহ</h3>
+                <button class="close-btn" onclick="closeModal('cancelledOrdersModal')"><i class="material-icons">close</i></button>
+            </div>
+            <div id="cancelledOrderListContainer"></div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        // 🟢 Replace with your Google Apps Script URL
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzOHccQNNdhTawCfuqMqZQL0ZIVEy70pr6NP4Njr5oS64nAUz13vUpvF06cHJ2zxLAD/exec';
+        let globalCustomers = [], globalItems = [], globalPayments = [];
+        let globalRunningOrders = [], globalCompletedOrders = [], globalCancelledOrders = [];
+        let isAppUnlocked = false; 
+
+        document.getElementById('orderDate').valueAsDate = new Date();
+
+        function initApp() {
+            initTheme();
+            checkAuth(); 
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('tfm_theme');
+            const hour = new Date().getHours();
+            let isDark = false;
+            if (savedTheme) { isDark = savedTheme === 'dark'; } 
+            else { if (hour >= 18 || hour < 6) { isDark = true; } }
+            applyTheme(isDark);
+        }
+
+        function toggleTheme() {
+            const isDark = document.body.classList.contains('dark-mode');
+            applyTheme(!isDark);
+        }
+
+        function applyTheme(isDark) {
+            const toggleBtn = document.getElementById('themeToggleBtn');
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+                toggleBtn.innerText = 'light_mode';
+                localStorage.setItem('tfm_theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                toggleBtn.innerText = 'dark_mode';
+                localStorage.setItem('tfm_theme', 'light');
+            }
+        }
+
+        function verifyPassword() {
+            const pwd = document.getElementById('appPwd').value;
+            const encodedPwd = btoa(pwd); 
+            const targetEncoded = 'dGZtQG1haGlt'; // tfm@mahim
+
+            if(encodedPwd === targetEncoded) {
+                isAppUnlocked = true; 
+                document.getElementById('pwdError').style.display = 'none';
+                checkAuth();
+            } else { 
+                document.getElementById('pwdError').style.display = 'block'; 
+            }
+        }
+
+        function checkAuth() {
+            if(isAppUnlocked) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                loadDashboardData();
+            } else {
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('mainApp').style.display = 'none';
+            }
+        }
+
+        function logout() {
+            isAppUnlocked = false;
+            document.getElementById('appPwd').value = '';
+            checkAuth();
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.className = isError ? "show error" : "show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", "").replace("error", ""); }, 3500);
+        }
+
+        function addItemRow() {
+            const container = document.getElementById('itemsContainer');
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            row.innerHTML = `<input type="text" placeholder="কী বানাবে?" class="item-name" required> <input type="number" placeholder="দাম (৳)" class="item-price" required> <input type="text" placeholder="নোট" class="item-note"> <button type="button" class="remove-btn" onclick="this.parentElement.remove()"><i class="material-icons" style="font-size: 16px;">close</i></button>`;
+            container.appendChild(row);
+        }
+
+        function processOrder() {
+            const itemsArray = [];
+            document.querySelectorAll('#newOrderModal .item-row').forEach(row => {
+                const name = row.querySelector('.item-name').value;
+                const price = row.querySelector('.item-price').value;
+                if(name && price) itemsArray.push({ name: name, price: Number(price), note: row.querySelector('.item-note').value });
+            });
+
+            if(itemsArray.length === 0) return showToast("অন্তত একটি ফার্নিচারের নাম ও দাম দিন!", true);
+            
+            let finalOrderDateTime = document.getElementById('orderDate').value;
+
+            const fileInput = document.getElementById('designImage');
+            const loader = document.getElementById('loading');
+            loader.style.display = 'block';
+
+            const data = {
+                action: 'addOrder', orderId: document.getElementById('orderId').value,
+                name: document.getElementById('customerName').value, phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value, 
+                orderDate: finalOrderDateTime, 
+                deliveryDate: document.getElementById('deliveryDate').value, status: "চলমান", 
+                items: itemsArray, advance: Number(document.getElementById('advancePayment').value),
+                images: [] 
+            };
+
+            if(!data.orderId || !data.name) { loader.style.display = 'none'; return showToast("প্রয়োজনীয় তথ্য দিন!", true); }
+
+            if(fileInput.files.length > 0) {
+                const promises = [];
+                for(let i=0; i<fileInput.files.length; i++) {
+                    promises.push(new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.readAsDataURL(fileInput.files[i]);
+                    }));
+                }
+                Promise.all(promises).then(base64Images => {
+                    data.images = base64Images;
+                    sendOrderToBackend(data);
+                });
+            } else { sendOrderToBackend(data); }
+        }
+
+        function sendOrderToBackend(data) {
+            fetch(scriptURL, { method: 'POST', body: JSON.stringify(data) }).then(res => res.json()).then(res => {
+                document.getElementById('loading').style.display = 'none'; 
+                showToast(res.message); 
+                document.getElementById('orderForm').reset();
+                document.getElementById('fileNameDisplay').innerText = "ডিজাইনের ছবি যোগ করুন (মাল্টিপল সম্ভব)";
+                document.getElementById('orderDate').valueAsDate = new Date(); 
+                closeModal('newOrderModal'); loadDashboardData(); 
+            }).catch(() => { document.getElementById('loading').style.display = 'none'; showToast('সমস্যা হয়েছে! ইন্টারনেট চেক করুন।', true); });
+        }
+
+        function loadDashboardData() {
+            document.getElementById('runningOrderListLoading').style.display = 'block';
+            document.getElementById('runningOrderListContainer').innerHTML = '';
+            document.getElementById('completedOrderListContainer').innerHTML = '';
+
+            fetch(scriptURL).then(res => res.json()).then(data => {
+                globalCustomers = data.customers || [];
+                globalItems = data.items || [];
+                globalPayments = data.payments || [];
+                
+                let currentYear = new Date().getFullYear().toString(); 
+                let maxSerial = 0;
+                
+                globalCustomers.forEach(order => {
+                    let orderNoStr = order['অর্ডার নং'] ? order['অর্ডার নং'].toString() : '';
+                    if(orderNoStr.startsWith(currentYear)) {
+                        let num = parseInt(orderNoStr.substring(4), 10);
+                        if(!isNaN(num) && num > maxSerial) { maxSerial = num; }
+                    }
+                });
+                
+                let nextIdNum = maxSerial + 1;
+                let paddedSerial = String(nextIdNum).padStart(4, '0');
+                document.getElementById('orderId').value = currentYear + paddedSerial;
+
+                let totalDuesAmount = 0; 
+                globalRunningOrders = globalCustomers.filter(order => order['স্ট্যাটাস'] === 'চলমান' || order['স্ট্যাটাস'] === '').reverse();
+                globalCompletedOrders = globalCustomers.filter(order => order['স্ট্যাটাস'] === 'সম্পন্ন').reverse();
+                globalCancelledOrders = globalCustomers.filter(order => order['স্ট্যাটাস'] === 'বাতিল').reverse();
+
+                globalRunningOrders.forEach(order => { totalDuesAmount += (Number(order['বকেয়া']) || 0); });
+
+                document.getElementById('totalOrders').innerText = globalRunningOrders.length; 
+                document.getElementById('totalDues').innerText = totalDuesAmount + ' ৳';
+                
+                document.getElementById('runningOrderListLoading').style.display = 'none';
+                renderRunningOrders(true); renderCompletedOrders(true); renderCancelledOrders();
+            }).catch((err) => {
+                document.getElementById('runningOrderListLoading').innerText = "ডেটা লোড করতে সমস্যা হয়েছে! ইন্টারনেট কানেকশন চেক করুন।";
+            });
+        }
+
+        // 🟢 Updated Message Logic
+        function copyMsg(type, id, name, total, paid, due) {
+            let msg = '';
+            if (type === 1) {
+                msg = `আসসালামু আলাইকুম ${name} ভাই/আপু,\nআপনার অর্ডারটি (অর্ডার নং: ${id}) আমরা সানন্দে গ্রহণ করেছি। \n\nঅর্ডারের বিবরণ:\nমোট বিল: ${total} ৳\nঅগ্রিম জমা: ${paid} ৳\nবর্তমান বকেয়া: ${due} ৳\n\nতোফাজ্জুল ফার্নিচার-এর ওপর আস্থা রাখার জন্য আপনাকে অসংখ্য ধন্যবাদ! আপনার ফার্নিচারটি সর্বোচ্চ যত্ন সহকারে তৈরি করা হবে ইনশাআল্লাহ।\n\nসৌজন্যে,\nতোফাজ্জুল ফার্নিচার`;
+            } else {
+                msg = `আসসালামু আলাইকুম ${name} ভাই/আপু,\nআপনার ফার্নিচারের অর্ডারের (অর্ডার নং: ${id}) কাজ চলছে। \n\nবর্তমান হিসাব:\nমোট বিল: ${total} ৳\nজমা: ${paid} ৳\nবর্তমান বকেয়া: ${due} ৳\n\nযেকোনো প্রয়োজনে আমাদের সাথে যোগাযোগ করতে পারেন। ধন্যবাদান্তে,\nতোফাজ্জুল ফার্নিচার`;
+            }
+            navigator.clipboard.writeText(msg).then(() => showToast("মেসেজ কপি হয়েছে! এখন পেস্ট করতে পারেন।")).catch(() => showToast("কপি করতে সমস্যা হয়েছে!", true));
+        }
+
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '';
+            let dt = new Date(dateStr);
+            if (isNaN(dt)) return '';
+            return dt.toLocaleString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            let dt = new Date(dateStr);
+            if (isNaN(dt)) return '';
+            if(dateStr.toString().includes(':')) {
+                return dt.toLocaleString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            } else {
+                return dt.toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' });
+            }
+        }
+
+        function renderRunningOrders(isLimited) {
+            let html = '';
+            let ordersToShow = isLimited ? globalRunningOrders.slice(0, 5) : globalRunningOrders;
+
+            ordersToShow.forEach(order => {
+                const due = Number(order['বকেয়া']) || 0;
+                const total = order['মোট দাম'] || 0, paid = order['মোট জমা'] || 0;
+                const deliveryInfo = order['ডেলিভারির তারিখ'] ? ` | <strong style="color:var(--md-sys-color-error);">ডেলিভারি:</strong> ${formatDate(order['ডেলিভারির তারিখ'])}` : '';
+                
+                let lastEditStr = `<div class="time-box">
+                    <div><i class="material-icons" style="font-size:22px; color: var(--md-sys-color-primary);">event_available</i> <span>অর্ডার গ্রহণ: <strong>${formatDate(order['অর্ডার নেওয়ার তারিখ'])}</strong></span></div>
+                    ${order['সর্বশেষ আপডেট'] ? `<div><i class="material-icons" style="font-size:22px; color: var(--md-sys-color-error);">update</i> <span>সর্বশেষ আপডেট: <strong>${formatDateTime(order['সর্বশেষ আপডেট'])}</strong></span></div>` : ''}
+                </div>`;
+                
+                html += `
+                <div class="order-card" style="border-left: 6px solid var(--md-sys-color-primary);">
+                    <div class="order-header" style="align-items: flex-start;">
+                        <div style="display:flex; align-items:flex-start; gap:12px;">
+                            <i class="material-icons" style="color:var(--md-sys-color-primary); font-size:32px; margin-top:2px;">handyman</i> 
+                            <div style="line-height: 1.3;">
+                                <div style="font-size: 14px; color: var(--text-muted); font-weight: 500;">${order['অর্ডার নং']}</div>
+                                <div style="font-size: 22px; color: var(--text-color); font-weight: 700;">${order['গ্রাহকের নাম']}</div>
+                            </div>
+                        </div>
+                        <span style="color: ${due > 0 ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)'}; font-size:20px; white-space: nowrap;">বকেয়া: ${due} ৳</span>
+                    </div>
+                    <div class="order-details">
+                        <p><strong>ফোন:</strong> ${order['ফোন নম্বর']}${deliveryInfo}</p>
+                        <p><strong>ঠিকানা:</strong> ${order['ঠিকানা'] || 'দেওয়া হয়নি'}</p>
+                        <p><strong>মোট দাম:</strong> ${total} ৳ | <strong>মোট জমা:</strong> ${paid} ৳</p>
+                    </div>
+                    ${lastEditStr}
+                    <div class="action-buttons">
+                        <button class="btn-sm bg-purple" onclick="openAllInfoModal('${order['অর্ডার নং']}')"><i class="material-icons" style="font-size:18px;">visibility</i> সকল তথ্য</button>
+                        <button class="btn-sm bg-teal" onclick="openPaymentModal('${order['অর্ডার নং']}', '${order['গ্রাহকের নাম']}')"><i class="material-icons" style="font-size:18px;">payments</i> জমা নিন</button>
+                        <button class="btn-sm bg-orange" onclick="openEditModal('${order['অর্ডার নং']}', '${order['গ্রাহকের নাম']}', '${order['ফোন নম্বর']}', '${order['ঠিকানা']}', '${order['স্ট্যাটাস']}')"><i class="material-icons" style="font-size:18px;">edit</i> এডিট</button>
+                        <a href="tel:${order['ফোন নম্বর']}" class="btn-sm bg-blue"><i class="material-icons" style="font-size:18px;">call</i> কল করুন</a>
+                        <button class="btn-sm bg-green" onclick="copyMsg(1, '${order['অর্ডার নং']}', '${order['গ্রাহকের নাম']}', '${total}', '${paid}', '${due}')"><i class="material-icons" style="font-size:18px;">content_copy</i> অর্ডার গ্রহণ</button>
+                        <button class="btn-sm bg-dark" onclick="copyMsg(2, '${order['অর্ডার নং']}', '${order['গ্রাহকের নাম']}', '${total}', '${paid}', '${due}')"><i class="material-icons" style="font-size:18px;">content_copy</i> আপডেট মেসেজ</button>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('runningOrderListContainer').innerHTML = html || '<p style="text-align:center; color: var(--text-muted); padding: 20px; font-size: 18px; font-weight:bold;">কোনো রানিং অর্ডার নেই।</p>';
+            const viewAllBtn = document.getElementById('viewAllRunningBtn'), viewLessBtn = document.getElementById('viewLessRunningBtn');
+            if (globalRunningOrders.length > 5) { if (isLimited) { viewAllBtn.style.display = 'block'; viewAllBtn.onclick = () => renderRunningOrders(false); viewLessBtn.style.display = 'none'; } else { viewAllBtn.style.display = 'none'; viewLessBtn.style.display = 'block'; viewLessBtn.onclick = () => renderRunningOrders(true); } } else { viewAllBtn.style.display = 'none'; viewLessBtn.style.display = 'none'; }
+        }
+
+        function renderCompletedOrders(isLimited) {
+            let html = '';
+            let ordersToShow = isLimited ? globalCompletedOrders.slice(0, 5) : globalCompletedOrders;
+
+            ordersToShow.forEach(order => {
+                const due = Number(order['বকেয়া']) || 0, total = order['মোট দাম'] || 0, paid = order['মোট জমা'] || 0;
+                
+                html += `
+                <div class="order-card" style="border-left: 6px solid var(--border-color); opacity:0.85;">
+                    <div class="order-header" style="align-items: flex-start;">
+                        <div style="display:flex; align-items:flex-start; gap:12px;">
+                            <i class="material-icons" style="color:var(--text-muted); font-size:32px; margin-top:2px;">task_alt</i> 
+                            <div style="line-height: 1.3;">
+                                <div style="font-size: 14px; color: var(--text-muted); font-weight: 500;">${order['অর্ডার নং']}</div>
+                                <div style="font-size: 22px; color: var(--text-muted); font-weight: 700;">${order['গ্রাহকের নাম']}</div>
+                            </div>
+                        </div>
+                        <span style="color: ${due > 0 ? 'var(--md-sys-color-error)' : 'var(--text-muted)'}; font-size:20px; white-space: nowrap;">বকেয়া: ${due} ৳</span>
+                    </div>
+                    <div class="order-details">
+                        <p><strong>ফোন:</strong> ${order['ফোন নম্বর']}</p>
+                        <p><strong>মোট দাম:</strong> ${total} ৳ | <strong>মোট জমা:</strong> ${paid} ৳</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-sm bg-purple" onclick="openAllInfoModal('${order['অর্ডার নং']}')"><i class="material-icons" style="font-size:18px;">visibility</i> সকল তথ্য</button>
+                        ${due > 0 ? `<button class="btn-sm bg-teal" onclick="openPaymentModal('${order['অর্ডার নং']}', '${order['গ্রাহকের নাম']}')"><i class="material-icons" style="font-size:18px;">payments</i> বকেয়া জমা</button>` : ''}
+                        <button class="btn-sm bg-orange" onclick="openEditModal('${order['অর্ডার নং']}', '${order['গ্রাহকের নাম']}', '${order['ফোন নম্বর']}', '${order['ঠিকানা']}', '${order['স্ট্যাটাস']}')"><i class="material-icons" style="font-size:18px;">edit</i> এডিট</button>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('completedOrderListContainer').innerHTML = html || '<p style="text-align:center; color: var(--text-muted); padding: 20px; font-size: 18px; font-weight:bold;">কোনো সম্পন্ন অর্ডার নেই।</p>';
+            const viewAllBtn = document.getElementById('viewAllCompletedBtn'), viewLessBtn = document.getElementById('viewLessCompletedBtn');
+            if (globalCompletedOrders.length > 5) { if (isLimited) { viewAllBtn.style.display = 'block'; viewAllBtn.onclick = () => renderCompletedOrders(false); viewLessBtn.style.display = 'none'; } else { viewAllBtn.style.display = 'none'; viewLessBtn.style.display = 'block'; viewLessBtn.onclick = () => renderCompletedOrders(true); } } else { viewAllBtn.style.display = 'none'; viewLessBtn.style.display = 'none'; }
+        }
+
+        function renderCancelledOrders() {
+            let html = '';
+            globalCancelledOrders.forEach(order => {
+                const total = order['মোট দাম'] || 0, paid = order['মোট জমা'] || 0;
+                
+                html += `
+                <div class="order-card" style="border-left: 6px solid var(--md-sys-color-error); background: var(--cancel-bg);">
+                    <div class="order-header" style="align-items: flex-start;">
+                        <div style="display:flex; align-items:flex-start; gap:12px;">
+                            <i class="material-icons" style="color:var(--md-sys-color-error); font-size:32px; margin-top:2px;">cancel</i> 
+                            <div style="line-height: 1.3;">
+                                <div style="font-size: 14px; color: var(--md-sys-color-error); font-weight: 500;">${order['অর্ডার নং']}</div>
+                                <div style="font-size: 22px; color: var(--md-sys-color-error); font-weight: 700;">${order['গ্রাহকের নাম']}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-details">
+                        <p><strong>ফোন:</strong> ${order['ফোন নম্বর']}</p>
+                        <p><strong>মোট দাম:</strong> ${total} ৳ | <strong>মোট জমা:</strong> ${paid} ৳</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-sm bg-purple" onclick="openAllInfoModal('${order['অর্ডার নং']}')"><i class="material-icons" style="font-size:18px;">visibility</i> সকল তথ্য</button>
+                        <button class="btn-sm bg-orange" onclick="openEditModal('${order['অর্ডার নং']}', '${order['গ্রাহকের নাম']}', '${order['ফোন নম্বর']}', '${order['ঠিকানা']}', '${order['স্ট্যাটাস']}')"><i class="material-icons" style="font-size:18px;">restore</i> রিস্টোর (এডিট)</button>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('cancelledOrderListContainer').innerHTML = html || '<p style="text-align:center; color: var(--text-muted); padding: 20px; font-size: 18px; font-weight:bold;">কোনো বাতিল অর্ডার নেই।</p>';
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function openAllInfoModal(orderId) {
+            const customer = globalCustomers.find(c => String(c['অর্ডার নং']) === String(orderId));
+            const items = globalItems.filter(i => String(i['অর্ডার নং']) === String(orderId));
+            const payments = globalPayments.filter(p => String(p['অর্ডার নং']) === String(orderId));
+            
+            if(!customer) return;
+            
+            let imgHtml = '';
+            if (customer['ছবি']) {
+                let urls = customer['ছবি'].toString().split(',').map(url => url.trim());
+                imgHtml = '<div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:15px;">';
+                urls.forEach(url => {
+                    if(url) {
+                        imgHtml += `<img src="${url}" style="max-width:100%; max-height:300px; border-radius:12px; border:2px solid var(--border-color);">`;
+                    }
+                });
+                imgHtml += '</div>';
+            }
+
+            let html = `
+                ${imgHtml}
+                <div class="customer-details-box" style="background:var(--item-bg); padding:18px; border-radius:16px; margin-bottom:18px; border: 1px solid var(--border-color);">
+                    <p style="margin:6px 0; font-size:17px; color:var(--text-color);"><strong>অর্ডার নং:</strong> ${customer['অর্ডার নং']}</p>
+                    <p style="margin:6px 0; font-size:17px; color:var(--text-color);"><strong>নাম:</strong> ${customer['গ্রাহকের নাম']}</p>
+                    <p style="margin:6px 0; font-size:17px; color:var(--text-color);"><strong>ফোন:</strong> ${customer['ফোন নম্বর']}</p>
+                    <p style="margin:6px 0; font-size:17px; color:var(--text-color);"><strong>ঠিকানা:</strong> ${customer['ঠিকানা']}</p>
+                    
+                    <div class="time-box" style="margin-top:15px; border-radius:8px; border-left:4px solid var(--md-sys-color-primary);">
+                        <div><i class="material-icons" style="font-size:20px; color:var(--md-sys-color-primary);">event_available</i> <span style="color:var(--text-color);">অর্ডার গ্রহণ: <strong>${formatDate(customer['অর্ডার নেওয়ার তারিখ'])}</strong></span></div>
+                        ${customer['সর্বশেষ আপডেট'] ? `<div><i class="material-icons" style="font-size:20px; color:var(--md-sys-color-error);">update</i> <span style="color:var(--text-color);">সর্বশেষ আপডেট: <strong>${formatDateTime(customer['সর্বশেষ আপডেট'])}</strong></span></div>` : ''}
+                    </div>
+
+                    <p style="margin:10px 0 0 0; font-size:17px; color:var(--text-color);"><strong>স্ট্যাটাস:</strong> <span style="color:${customer['স্ট্যাটাস'] === 'সম্পন্ন' ? 'var(--md-sys-color-success)' : (customer['স্ট্যাটাস'] === 'বাতিল' ? 'var(--md-sys-color-error)' : 'var(--text-color)')}; font-weight:bold;">${customer['স্ট্যাটাস']}</span></p>
+                </div>
+                <h4 style="margin:10px 0; color:var(--md-sys-color-primary); font-size:20px;">ফার্নিচারের তালিকা</h4>
+                <table class="info-table"><tr><th>নাম</th><th>দাম</th><th>নোট</th></tr>${items.map(i => `<tr><td>${i['ফার্নিচারের নাম']}</td><td>${i['দাম']} ৳</td><td>${i['নোট'] || '-'}</td></tr>`).join('')}<tr style="font-weight:bold; background:var(--table-th-bg);"><td>মোট দাম:</td><td colspan="2" style="color:var(--table-th-color);">${customer['মোট দাম']} ৳</td></tr></table>
+                <h4 style="margin:15px 0 10px 0; color:var(--md-sys-color-primary); font-size:20px;">জমার হিস্ট্রি</h4>
+                ${payments.length > 0 ? `<table class="info-table"><tr><th>তারিখ</th><th>টাকা</th><th>নোট</th></tr>${payments.map(p => `<tr><td>${formatDate(p['তারিখ'])}</td><td>${p['জমাকৃত টাকা']} ৳</td><td>${p['নোট'] || '-'}</td></tr>`).join('')}<tr style="font-weight:bold; background:var(--table-th-bg);"><td>মোট জমা:</td><td colspan="2" style="color:var(--table-th-color);">${customer['মোট জমা']} ৳</td></tr></table>` : '<p style="font-size:16px; color:var(--text-muted); font-weight:bold;">কোনো জমা নেই।</p>'}
+                <div class="total-due" style="text-align:right; font-size:26px; font-weight:bold; color:var(--md-sys-color-error); margin-top:20px;">সর্বমোট বকেয়া: ${customer['বকেয়া'] || 0} ৳</div>
+                
+                <div style="display:flex; justify-content:flex-end; margin-top: 40px; padding-right: 15px;">
+                    <div style="text-align:center;">
+                        <div class="signature-box" style="font-family: cursive, sans-serif; font-size: 24px; color: var(--md-sys-color-primary); padding-bottom: 5px; margin-bottom: 5px; width: 160px; border-bottom: 1px dashed var(--text-color);">Tofazzul</div>
+                        <div style="font-weight: bold; color: var(--text-color); font-size: 15px;">স্বাক্ষর</div>
+                        <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">তারিখ: ${new Date().toLocaleDateString('bn-BD')}</div>
+                    </div>
+                </div>
+                
+                <div class="footer-note" style="text-align:center; color:var(--text-muted); font-size:12px; margin-top:35px; border-top:1px solid var(--border-color); padding-top:10px;">তোফাজ্জুল ফার্নিচার - ধন্যবাদান্তে</div>
+            `;
+            
+            document.getElementById('allInfoContent').innerHTML = html;
+
+            const downloadBtn = document.getElementById('downloadImgBtn');
+            downloadBtn.onclick = () => downloadInfoAsImage(customer['অর্ডার নং'], customer['গ্রাহকের নাম']);
+            
+            openModal('allInfoModal');
+        }
+
+        function downloadInfoAsImage(orderId, customerName) {
+            const content = document.getElementById('allInfoContentWrapper');
+            const downloadBtn = document.getElementById('downloadImgBtn');
+            
+            content.classList.add('exporting');
+            downloadBtn.style.display = 'none'; 
+            showToast("ছবি তৈরি হচ্ছে, দয়া করে অপেক্ষা করুন...", false);
+
+            html2canvas(content, {
+                useCORS: true, 
+                scale: 2, 
+                backgroundColor: "#FFFFFF", 
+                logging: false,
+                onclone: (clonedDoc) => {
+                    clonedDoc.body.classList.remove('dark-mode');
+                }
+            }).then(canvas => {
+                content.classList.remove('exporting');
+                downloadBtn.style.display = 'flex';
+
+                const link = document.createElement('a');
+                const safeName = customerName.replace(/[^a-z0-9\u0980-\u09FF]/gi, '_').toLowerCase();
+                link.download = `${orderId}_${safeName}_Summary.png`;
+                link.href = canvas.toDataURL('image/png');
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showToast("ছবি সফলভাবে ডাউনলোড হয়েছে!", false);
+            }).catch(err => {
+                content.classList.remove('exporting');
+                downloadBtn.style.display = 'flex';
+                showToast("ছবি তৈরি করতে সমস্যা হয়েছে! আবার চেষ্টা করুন।", true);
+            });
+        }
+
+        function openEditModal(id, name, phone, address, status) {
+            document.getElementById('editOrderIdOriginal').value = id;
+            document.getElementById('editOrderIdInput').value = id; 
+            document.getElementById('editName').value = name;
+            document.getElementById('editPhone').value = phone;
+            document.getElementById('editAddress').value = address;
+            document.getElementById('editStatus').value = status || "চলমান";
+            openModal('editModal');
+        }
+
+        function submitEdit() {
+            const data = { 
+                action: 'updateOrder', 
+                oldOrderId: document.getElementById('editOrderIdOriginal').value, 
+                newOrderId: document.getElementById('editOrderIdInput').value, 
+                name: document.getElementById('editName').value, 
+                phone: document.getElementById('editPhone').value, 
+                address: document.getElementById('editAddress').value, 
+                status: document.getElementById('editStatus').value 
+            };
+            document.getElementById('editLoading').innerText = "আপডেট হচ্ছে...";
+            document.getElementById('editLoading').style.display = 'block';
+            fetch(scriptURL, { method: 'POST', body: JSON.stringify(data) }).then(res => res.json()).then(res => {
+                document.getElementById('editLoading').style.display = 'none'; showToast(res.message); closeModal('editModal'); loadDashboardData();
+            }).catch(() => { document.getElementById('editLoading').style.display = 'none'; showToast('সমস্যা হয়েছে!', true); });
+        }
+        
+        function deleteOrder() {
+            const orderId = document.getElementById('editOrderIdOriginal').value;
+            if(!confirm("আপনি কি নিশ্চিত যে এই অর্ডারটি সম্পূর্ণ মুছে ফেলতে চান? এটি আর ফিরিয়ে আনা যাবে না!")) return;
+            
+            document.getElementById('editLoading').innerText = "ডিলিট হচ্ছে...";
+            document.getElementById('editLoading').style.display = 'block';
+            
+            const data = { action: 'deleteOrder', orderId: orderId };
+            
+            fetch(scriptURL, { method: 'POST', body: JSON.stringify(data) }).then(res => res.json()).then(res => {
+                document.getElementById('editLoading').style.display = 'none';
+                showToast(res.message);
+                closeModal('editModal');
+                loadDashboardData();
+            }).catch(() => { 
+                document.getElementById('editLoading').style.display = 'none';
+                showToast('সমস্যা হয়েছে!', true); 
+            });
+        }
+
+        function openPaymentModal(id, name) {
+            document.getElementById('payOrderId').value = id; document.getElementById('payCustomerName').innerText = "গ্রাহক: " + name;
+            document.getElementById('payDate').valueAsDate = new Date();
+            openModal('paymentModal');
+        }
+
+        function submitPayment() {
+            const data = { action: 'addPayment', orderId: document.getElementById('payOrderId').value, amount: Number(document.getElementById('payAmount').value), date: document.getElementById('payDate').value, note: document.getElementById('payNote').value };
+            if(!data.amount) return showToast("জমার পরিমাণ লিখুন!", true);
+            document.getElementById('payLoading').style.display = 'block';
+            fetch(scriptURL, { method: 'POST', body: JSON.stringify(data) }).then(res => res.json()).then(res => {
+                document.getElementById('payLoading').style.display = 'none'; showToast(res.message); closeModal('paymentModal'); loadDashboardData();
+            }).catch(() => { document.getElementById('payLoading').style.display = 'none'; showToast('সমস্যা হয়েছে!', true); });
+        }
+    </script>
+</body>
+</html>
+
